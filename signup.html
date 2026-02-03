@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SaySo - Sign Up</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+    <h1>SaySo Sign Up</h1>
+
+    <!-- sign up form for creating a new account -->
+    <form id="signupForm">
+        <label>Username</label>
+        <input type="text" name="username" id="username" required>
+
+        <label>Password</label>
+        <input type="password" name="password" id="password" required>
+
+        <button type="submit">Sign Up</button>
+    </form>
+
+    <!-- link back to login page -->
+    <p style="text-align:center; margin-top:15px;">
+        Already have an account? <a href="/">Log in</a>
+    </p>
+
+    <!-- shows error messages if signup fails -->
+    <p id="message" class="message"></p>
+</div>
+
+<script>
+// runs when the signup form is submitted
+document.getElementById("signupForm").addEventListener("submit", async e => {
+    e.preventDefault();
+
+    // gets the values the user typed in
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    // sends the signup details to the backend
+    const res = await fetch("/signup", {
+        method: "POST",
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+    });
+
+    // if signup works, user is redirected
+    if (res.redirected) {
+        window.location.href = res.url;
+    } else {
+        // shows message if username is already taken
+        document.getElementById("message").innerText = "Username already taken";
+    }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Help - SaySo</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="layout">
+
+    <!-- sidebar with navigation and user info -->
+    <aside class="sidebar">
+        <div class="profile clickable" onclick="goProfile()">
+            <div class="avatar">👤</div>
+            <div class="username" id="sidebarUsername">Loading...</div>
+        </div>
+
+        <div class="menu-section">
+            <h3>SaySo</h3>
+            <a href="/homepage">Dashboard</a>
+            <a href="/create-questionnaire">Create Questionnaire</a>
+        </div>
+
+        <div class="sidebar-bottom">
+            <a href="/help">Help</a>
+            <a href="/logout" class="logout">Logout</a>
+        </div>
+    </aside>
+
+    <!-- main help content -->
+    <main class="content">
+        <h1>Help Section</h1>
+        <p>If you need assistance with SaySo, you can:</p>
+        <ul>
+            <li>Check the FAQ!</li>
+            <li>Contact support via email ~ w1992958@westminster.ac.uk</li>
+            <li>Watch tutorial videos!</li>
+        </ul>
+
+        <!-- button to go back to previous page -->
+        <button onclick="goBack()" style="margin-top:20px; padding:10px 20px; background:#6b1f2b; color:white; border:none; border-radius:6px; cursor:pointer;">
+            Back
+        </button>
+    </main>
+
+</div>
+
+<script>
+// sends user to profile page when profile is clicked
+function goProfile() {
+    window.location.href = "/profile";
+}
+
+// goes back to the previous page
+function goBack() {
+    window.history.back();
+}
+
+// gets the logged in username and shows it in the sidebar
+fetch("/api/me")
+  .then(res => res.json())
+  .then(data => {
+      document.getElementById("sidebarUsername").innerText = data.username;
+  });
+</script>
+
+</body>
+</html>

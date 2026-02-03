@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SaySo - Login</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+    <h1>SaySo Login</h1>
+
+    <!-- login form -->
+    <form id="loginForm">
+        <label>Username</label>
+        <input type="text" id="username" required>
+
+        <label>Password</label>
+        <input type="password" id="password" required>
+
+        <button type="submit">Login</button>
+    </form>
+
+    <!-- link to sign up page -->
+    <p style="text-align:center; margin-top:15px;">
+        Don't have an account? <a href="/signup">Sign Up</a>
+    </p>
+
+    <!-- shows login error messages -->
+    <p id="message" class="message"></p>
+</div>
+
+<script>
+// runs when the login form is submitted
+document.getElementById("loginForm").addEventListener("submit", async e => {
+    e.preventDefault();
+
+    // gets values typed by the user
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    // sends login details to the backend
+    const res = await fetch("/", {
+        method: "POST",
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+    });
+
+    // if login works, user gets redirected
+    if (res.redirected) {
+        window.location.href = res.url;
+    } else {
+        // shows error if login fails
+        document.getElementById("message").innerText = "Invalid username or password";
+    }
+});
+</script>
+</body>
+</html>

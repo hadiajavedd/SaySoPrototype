@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Responses - {{ questionnaire.title }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="layout">
+    <!-- sidebar with profile + links -->
+    <aside class="sidebar">
+        <div class="profile clickable" onclick="location.href='/profile'">
+            <div class="avatar">👤</div>
+            <div class="username" id="username">USER</div>
+        </div>
+
+        <div class="menu-section">
+            <h3>SaySo</h3>
+            <a href="/homepage">Dashboard</a>
+        </div>
+
+        <div class="sidebar-bottom">
+            <a href="/help">Help</a>
+            <a href="/logout" class="logout">Logout</a>
+        </div>
+    </aside>
+
+    <!-- main page showing the responses table -->
+    <main class="content">
+        <div class="responses-container">
+            <div class="responses-top-row">
+                <h1 class="responses-title">Responses: {{ questionnaire.title }}</h1>
+                <button class="responses-back-btn" onclick="location.href='/homepage'">Back</button>
+            </div>
+
+            <!-- only shows the table if there are responses -->
+            {% if responses and responses|length > 0 %}
+                <table class="responses-table">
+                    <tr>
+                        <th>#</th>
+                        <th>Submitted</th>
+                        <!-- creates a header column for each question -->
+                        {% for q in questions %}
+                            <th>Q{{ loop.index }}: {{ q.text }}</th>
+                        {% endfor %}
+                    </tr>
+
+                    <!-- each row is one person's submitted response -->
+                    {% for r in responses %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ r.submitted_at.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+                            {% for ans in r.answers %}
+                                <td>{{ ans }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p class="responses-muted">No responses yet.</p>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+<script>
+// gets the username for the sidebar
+fetch("/api/me")
+.then(res => res.json())
+.then(data => {
+    if(!data.error) document.getElementById("username").innerText = data.username;
+});
+</script>
+
+</body>
+</html>
