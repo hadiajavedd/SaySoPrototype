@@ -1,1 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Take Questionnaire - {{ questionnaire.title }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
 
+<div class="public-container public-wide">
+    <!-- shows the questionnaire title -->
+    <h1 class="public-title">{{ questionnaire.title }}</h1>
+
+    <!-- form that submits all answers -->
+    <form method="POST" class="take-form">
+        <!-- loops through each question in the questionnaire -->
+        {% for q in questionnaire.questions %}
+            <div class="take-question">
+                <!-- displays the question number and text -->
+                <label class="take-label">Q{{ loop.index }}: {{ q.text }}</label>
+
+                <!-- text input question -->
+                {% if q.qtype == "text" %}
+                    <input class="take-input" type="text" name="q{{ q.id }}" required>
+
+                <!-- yes or no question -->
+                {% elif q.qtype == "yesno" %}
+                    <select class="take-select" name="q{{ q.id }}" required>
+                        <option value="" disabled selected>Select an answer</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+
+                <!-- scale question from 1 to 5 -->
+                {% elif q.qtype == "scale" %}
+                    <select class="take-select" name="q{{ q.id }}" required>
+                        <option value="" disabled selected>Select a rating</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+
+                <!-- fallback input if question type isnt recognised -->
+                {% else %}
+                    <input class="take-input" type="text" name="q{{ q.id }}" required>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <!-- submits all answers -->
+        <button class="primary-btn" type="submit">Submit Answers</button>
+    </form>
+</div>
+
+</body>
+</html>
