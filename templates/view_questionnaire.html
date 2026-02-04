@@ -1,1 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>View Questionnaire</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- small styles just for how each question is shown -->
+    <style>
+        .question-block {
+            background:#fff;
+            border:1px solid #ccc;
+            border-radius:12px;
+            padding:15px;
+            margin-bottom:10px;
+        }
+    </style>
+</head>
+<body>
+<div class="layout">
+    <!-- sidebar with profile and navigation -->
+    <aside class="sidebar">
+        <div class="profile clickable" onclick="location.href='/profile'">
+            <div class="avatar">👤</div>
+            <div class="username" id="username">USER</div>
+        </div>
+        <div class="menu-section">
+            <h3>SaySo</h3>
+            <a href="/homepage">Dashboard</a>
+        </div>
+    </aside>
 
+    <!-- main content showing the questionnaire -->
+    <main class="content">
+        <h1 style="color:#6b1f2b;">{{ questionnaire.title }}</h1>
+
+        <!-- loops through and displays each question -->
+        {% for q in questionnaire.questions %}
+        <div class="question-block">
+            <strong>Q{{ loop.index }}:</strong> {{ q.text }} <em>({{ q.qtype }})</em>
+        </div>
+        {% endfor %}
+    </main>
+</div>
+
+<script>
+// gets the logged in username and shows it in the sidebar
+fetch("/api/me")
+.then(res => res.json())
+.then(data => { if(!data.error) document.getElementById("username").innerText = data.username; });
+</script>
+</body>
+</html>
