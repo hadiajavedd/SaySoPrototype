@@ -1,1 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- extra styles for hiding stuff and the grey buttons -->
+    <style>
+        .hidden { display: none; }
+        .profile-card input { margin-bottom: 10px; }
+        .secondary {
+            background:#eee;
+            color:#222;
+            padding:8px 12px;
+            border:none;
+            border-radius:6px;
+            margin:5px 0;
+            cursor:pointer;
+        }
+    </style>
+</head>
+<body>
 
+<div class="layout">
+
+    <!-- sidebar for navigation and showing the username -->
+    <aside class="sidebar">
+        <div class="profile clickable" onclick="location.href='/profile'">
+            <div class="avatar">👤</div>
+            <div class="username" id="sidebarUsername">Loading...</div>
+        </div>
+
+        <div class="menu-section">
+            <h3>SaySo</h3>
+            <a href="/homepage">Dashboard</a>
+            <a href="/create-questionnaire">Create Questionnaire</a>
+        </div>
+
+        <div class="sidebar-bottom">
+            <a href="/help">Help</a>
+            <a href="/logout" class="logout">Logout</a>
+        </div>
+    </aside>
+
+    <!-- main profile info and settings -->
+    <main class="content">
+        <h1>Your Profile</h1>
+
+        <div class="profile-card">
+            <label>Username</label>
+            <input type="text" id="usernameInput">
+            <button onclick="saveUsername()">Save Username</button>
+
+            <!-- shows how many questionnaires the user has -->
+            <p class="stat">
+                Questionnaires created:
+                <strong id="questionnaireCount">0</strong>
+            </p>
+
+            <hr>
+
+            <!-- button to show/hide the password change form -->
+            <button class="secondary" onclick="togglePasswordForm()">
+                Change Password
+            </button>
+
+            <div id="passwordForm" class="hidden">
+                <input type="password" id="currentPassword" placeholder="Current Password" required>
+                <input type="password" id="newPassword" placeholder="New Password" required>
+                <input type="password" id="confirmPassword" placeholder="Confirm New Password" required>
+                <button class="secondary" onclick="changePassword()">Save Password</button>
+            </div>
+
+            <button class="secondary" onclick="location.href='/help'">Get Help</button>
+            <button class="logout-btn" onclick="location.href='/logout'">Logout</button>
+
+            <!-- deletes the account and asks for confirmation first -->
+            <form action="/delete-account" method="POST"
+                  onsubmit="return confirm('This will permanently delete your account and all data. Are you sure?');">
+                <button type="submit" class="logout-btn">Delete Account</button>
+            </form>
+        </div>
+    </main>
+
+</div>
+
+<script>
+// gets current user info and fills sidebar + input box
+fetch("/api/me")
+  .then(res => res.json())
+  .then(data => {
+      document.getElementById("sidebarUsername").innerText = data.username;
+      document.getElementById("usernameInput").value = data.username;
+  });
+
+// counts how many questionnaires the user has made
+fetch("/api/my-questionnaires")
+  .then(res => res.json())
+  .then(data => {
+      document.getElementById("questionnaireCount").innerText = data.length;
+  });
+
+// sends the new username to the backend and updates the sidebar text
+function saveUsername() {
+    const newUsername = document.getElementById("usernameInput").value;
+
+    fetch("/api/update-username", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: newUsername })
+    }).then(() => {
+        document.getElementById("sidebarUsername").innerText = newUsername;
+    });
+}
+
+// shows/hides the password form by toggling the hidden class
+function togglePasswordForm() {
+    document.getElementById("passwordForm").classList.toggle("hidden");
+}
+
+// checks the new passwords match then sends change request to backend
+function changePassword() {
+    const current = document.getElementById("currentPassword").value;
+    const newPass = document.getElementById("newPassword").value;
+    const confirm = document.getElementById("confirmPassword").value;
+
+    if (newPass !== confirm) {
+        alert("New passwords do not match");
+        return;
+    }
+
+    fetch("/api/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            current_password: current,
+            new_password: newPass
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById("passwordForm").classList.add("hidden");
+        }
+    });
+}
+</script>
+
+</body>
+</html>
