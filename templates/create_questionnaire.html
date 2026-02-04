@@ -1,1 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Questionnaire</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- styles for the question boxes and buttons on this page -->
+    <style>
+        .question-block {
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
 
+        .question-block input,
+        .question-block select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        .add-btn, .remove-btn {
+            background: #6b1f2b;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .remove-btn {
+            background: #ff4d4d;
+        }
+
+        .add-btn:hover { background: #8b2a3b; }
+        .remove-btn:hover { background: #ff6666; }
+    </style>
+</head>
+<body>
+
+<div class="layout">
+
+    <!-- sidebar navigation -->
+    <aside class="sidebar">
+        <div class="profile clickable" onclick="location.href='/profile'">
+            <div class="avatar">👤</div>
+            <div class="username" id="username">USER</div>
+        </div>
+
+        <div class="menu-section">
+            <h3>SaySo</h3>
+            <a href="/homepage">Dashboard</a>
+        </div>
+
+        <div class="sidebar-bottom">
+            <a href="/help">Help</a>
+            <a href="/logout" class="logout">Logout</a>
+        </div>
+    </aside>
+
+    <!-- main page content -->
+    <main class="content">
+        <h1 style="text-align:center; color:#6b1f2b;">Create Questionnaire</h1>
+
+        <div class="container" style="max-width:600px;">
+            <form id="createForm">
+                <label>Questionnaire Title</label>
+                <input type="text" id="title" placeholder="Enter title" required>
+
+                <!-- questions get added inside here -->
+                <div id="questionsContainer"></div>
+
+                <button type="button" class="add-btn" id="addQuestion">+ Add Question</button>
+                <button type="submit" class="add-btn" style="width:100%; margin-top:20px;">Create Questionnaire</button>
+            </form>
+        </div>
+    </main>
+
+</div>
+
+<script>
+// gets the logged in username and shows it in the sidebar
+fetch("/api/me")
+.then(res => res.json())
+.then(data => { if(!data.error) document.getElementById("username").innerText = data.username; });
+
+let questionCount = 0;
+
+// adds a new question box to the page
+function addQuestionBlock(text='', type='text') {
+    questionCount++;
+    const container = document.getElementById('questionsContainer');
+
+    const div = document.createElement('div');
+    div.className = 'question-block';
+    div.id = `question-${questionCount}`;
+
+    div.innerHTML = `
+        <label>Question ${questionCount}</label>
+        <input type="text" placeholder="Enter question text" value="${text}" required>
+        <select>
+            <option value="text" ${type==='text'?'selected':''}>Written Response</option>
+            <option value="yesno" ${type==='yesno'?'selected':''}>Yes/No</option>
+            <option value="scale" ${type==='scale'?'selected':''}>Scale 1-5</option>
+        </select>
+        <button type="button" class="remove-btn" onclick="removeQuestion(${questionCount})">Remove</button>
+    `;
+
+    container.appendChild(div);
+}
+
+// removes a question box by its number
+function removeQuestion(id) {
+    const block = document.getElementById(`question-${id}`);
+    if(block) block.remove();
+}
+
+document.getElementById('addQuestion').addEventListener('click', ()=> addQuestionBlock());
+
+// sends the title and questions to the backend api
+document.getElementById('createForm').addEventListener('submit', async e => {
+    e.preventDefault();
+
+    const title = document.getElementById('title').value;
+    const questionBlocks = document.querySelectorAll('.question-block');
+
+    const questions = [];
+    questionBlocks.forEach(block => {
+        const text = block.querySelector('input').value;
+        const qtype = block.querySelector('select').value;
+        questions.push({text, qtype});
+    });
+
+    const res = await fetch("/api/questionnaires", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ title, questions })
+    });
+
+    const data = await res.json();
+    if(data.id){
+        window.location.href = "/homepage";  // Go to dashboard
+    } else {
+        alert("Error creating questionnaire");
+    }
+});
+
+// adds one question straight away so the form isnt empty
+addQuestionBlock();
+
+</script>
+</body>
+</html>
